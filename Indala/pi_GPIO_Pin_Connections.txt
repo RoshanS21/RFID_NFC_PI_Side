@@ -1,0 +1,6 @@
+Ensure your Indala card reader is correctly wired to the Raspberry Pi:
+
+Data0 (Green Wire) → GPIO23 (Physical Pin 16)
+Data1 (White Wire) → GPIO18 (Physical Pin 12)
+Ground (Black Wire) → GND (Physical Pin 6)
++V (Red Wire) → 5V (Physical Pin 2 or 4)
