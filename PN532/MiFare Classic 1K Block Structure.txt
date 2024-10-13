@@ -1,0 +1,13 @@
+A. Understand MiFare Classic 1K Block Structure
+    Total Blocks: 64 blocks (16 sectors, each containing 4 blocks).
+    Sector Trailer: Each sector's last block (block 3, 7, 11, ..., 63) is reserved for keys and access conditions.
+    Data Blocks: Blocks 0, 1, 2, ..., 62 are data blocks.
+Important: Attempting to authenticate or read sector trailers without proper keys can lead to authentication failures.
+
+B. Use the Correct Authentication Key
+    Default Key A: FF FF FF FF FF FF
+This is commonly used for MiFare Classic cards. However, if your card uses a different key, you need to adjust accordingly.
+
+C. Select Appropriate Blocks
+    Avoid Sector Trailers: Do not attempt to read or write sector trailers (blocks 3, 7, 11, ..., 63) unless you intend to modify keys or access conditions.
+    Start with Data Blocks: Use data blocks like block 4, 5, 6, etc., for reading and writing.
