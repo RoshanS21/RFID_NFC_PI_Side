@@ -27,7 +27,7 @@ def initialize_pn532():
 
         # Get firmware version
         ic, ver, rev, support = pn532.firmware_version
-        logging.info('Found PN532 with firmware version: {0}.{1}'.format(ver, rev))
+        logging.info(f'Found PN532 with firmware version: {ver}.{rev}')
 
         # Configure PN532 to communicate with MiFare cards
         pn532.SAM_configuration()
@@ -41,6 +41,7 @@ def initialize_pn532():
 def read_card(pn532):
     """
     Continuously scan for NFC/RFID cards and display their UIDs.
+    If the card is MiFare Classic, attempt to read a memory block.
     """
     logging.info("Waiting for RFID/NFC card...")
 
@@ -57,7 +58,42 @@ def read_card(pn532):
             uid_str = ' '.join([f'{byte:02X}' for byte in uid])
             logging.info(f'Found card with UID: {uid_str}')
 
-            time.sleep(2)  # Prevent multiple detections of the same card
+            # Attempt to read MiFare Classic blocks
+            try:
+                # Access the MiFare class
+                mifare = pn532.mifare
+
+                # Select the card
+                if not mifare.select(uid):
+                    logging.warning("Failed to select the card.")
+                    continue
+
+                # Default key for MiFare Classic
+                DEFAULT_KEY = b'\xFF\xFF\xFF\xFF\xFF\xFF'
+
+                # Define block to read (e.g., block 4)
+                BLOCK_NUMBER = 4
+
+                # Authenticate block 4 with key A
+                if mifare.authenticate(BLOCK_NUMBER, DEFAULT_KEY, PN532_I2C.MIFARE_CMD_AUTH_A):
+                    logging.info(f'Authenticated block {BLOCK_NUMBER} successfully.')
+                    # Read block data
+                    block_data = mifare.read_block(BLOCK_NUMBER)
+                    if block_data:
+                        block_str = ' '.join([f'{byte:02X}' for byte in block_data])
+                        logging.info(f'Block {BLOCK_NUMBER} Data: {block_str}')
+                    else:
+                        logging.warning(f'Failed to read block {BLOCK_NUMBER}')
+                else:
+                    logging.warning(f'Authentication failed for block {BLOCK_NUMBER}')
+
+            except AttributeError:
+                logging.info('Card is not a MiFare Classic card or does not support authentication.')
+
+            except Exception as e:
+                logging.error(f'Error handling MiFare Classic card: {e}')
+
+            time.sleep(1)  # Prevent multiple detections of the same card
 
     except KeyboardInterrupt:
         logging.info("NFC scanning interrupted by user.")
