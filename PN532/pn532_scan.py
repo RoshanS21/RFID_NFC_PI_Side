@@ -87,12 +87,30 @@ def read_card(pn532):
                             logging.warning(f'Failed to read block {block_number}')
                     else:
                         logging.warning(f'Authentication failed for block {block_number}')
-
             except AttributeError:
                 logging.info('Card is not a MiFare Classic card or does not support authentication.')
-
             except Exception as e:
                 logging.error(f'Error handling MiFare Classic card: {e}')
+
+            # Attempt to read NDEF message if supported
+            try:
+                # Access the NDEF class
+                ndef = pn532.ndef
+
+                # Check if the card supports NDEF
+                if ndef:
+                    # Read the NDEF message
+                    message = ndef.message
+                    if message:
+                        logging.info(f'NDEF Message: {message}')
+                    else:
+                        logging.info('No NDEF message found.')
+                else:
+                    logging.info('Card does not support NDEF.')
+            except AttributeError:
+                logging.info('Card does not support NDEF.')
+            except Exception as e:
+                logging.error(f'Error reading NDEF message: {e}')
 
             time.sleep(2)  # Prevent multiple detections of the same card
 
