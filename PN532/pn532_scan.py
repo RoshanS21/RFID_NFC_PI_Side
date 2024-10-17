@@ -112,7 +112,7 @@ def read_card(pn532):
             except Exception as e:
                 logging.error(f'Error reading NDEF message: {e}')
 
-            time.sleep(2)  # Prevent multiple detections of the same card
+            time.sleep(1)  # Prevent multiple detections of the same card
 
     except KeyboardInterrupt:
         logging.info("NFC scanning interrupted by user.")
